@@ -9,7 +9,10 @@ def create_app():
     CORS(app)
 
     from .routes import main as main_blueprint
-    app.register_blueprint(main_blueprint)
+    app.register_blueprint(main_blueprint)  # ✅ This is CRUCIAL
+    
+    print("✅ Blueprint registered!")
+
 
     from .socket_events import register_socket_events
     register_socket_events(socketio)
