@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Real-Time Chat</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div id="chat-container">
+    <h2>Chat App</h2>
+
+    <input type="text" id="username" placeholder="Your name" />
+    <input type="text" id="room" placeholder="Room name" />
+    <button onclick="joinRoom()">Join Room</button>
+
+    <div id="messages"></div>
+
+    <input type="text" id="message" placeholder="Type a message" />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    const socket = io("http://127.0.0.1:5050");
+    let currentUser = "";
+
+    socket.on("connect", () => {
+      console.log("Connected");
+    });
+
+    socket.on("message", (data) => {
+      const messagesDiv = document.getElementById("messages");
+      const msgEl = document.createElement("div");
+      const timestamp = data.timestamp
+        ? new Date(data.timestamp).toLocaleTimeString()
+        : "";
+
+      msgEl.classList.add("message");
+      msgEl.classList.add(data.username === currentUser ? "self" : "other");
+
+      msgEl.innerHTML = `
+        <strong>${data.username || ""}</strong>: ${data.message || data.msg}
+        <div class="timestamp">${timestamp}</div>
+      `;
+      messagesDiv.appendChild(msgEl);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+
+    function joinRoom() {
+      const username = document.getElementById("username").value;
+      const room = document.getElementById("room").value;
+
+      if (!username || !room) return alert("Enter username and room!");
+
+      currentUser = username;
+      socket.emit("join", { username, room });
+    }
+
+    function sendMessage() {
+      const message = document.getElementById("message").value;
+      const username = document.getElementById("username").value;
+      const room = document.getElementById("room").value;
+
+      if (!message) return;
+
+      socket.emit("send_message", { username, room, message });
+      document.getElementById("message").value = "";
+    }
+    socket.on("message_history", (messages) => {
+  const messagesDiv = document.getElementById("messages");
+  messagesDiv.innerHTML = ""; // Clear existing messages
+
+  messages.forEach(data => {
+    const msgEl = document.createElement("div");
+    const timestamp = data.timestamp
+      ? new Date(data.timestamp).toLocaleTimeString()
+      : "";
+
+    msgEl.classList.add("message");
+    msgEl.classList.add(data.username === currentUser ? "self" : "other");
+
+    msgEl.innerHTML = `
+      <strong>${data.username}</strong>: ${data.message}
+      <div class="timestamp">${timestamp}</div>
+    `;
+    messagesDiv.appendChild(msgEl);
+  });
+
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+
+  </script>
+</body>
+</html>

@@ -4,9 +4,14 @@ from .db import users_collection
 
 main = Blueprint('main', __name__)
 
+
+from flask import Blueprint, request, jsonify, render_template
+...
+
 @main.route('/')
 def index():
-    return jsonify({"message": "Welcome to the Real-Time Chat App!"})
+    return render_template('index.html')
+
 
 
 @main.route('/signup', methods=['POST'])

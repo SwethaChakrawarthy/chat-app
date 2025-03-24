@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://localhost:27017/")  # Default MongoDB URL
+client = MongoClient("mongodb://mongo:27017/")
 db = client['chat_app_db']
 
 users_collection = db['users']
